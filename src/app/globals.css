@@ -1,0 +1,395 @@
+@import "tailwindcss";
+
+/*
+ * StockStack's visual identity.
+ *
+ * The whole interface is built from the same thing the game is: blocks. Every
+ * surface is a hard-edged slab with a light top-left bevel and a dark
+ * bottom-right one — the oldest trick in arcade UI, and the reason a flat
+ * rectangle reads as a physical object. Nothing is rounded, nothing is
+ * blurred, and nothing has a soft shadow.
+ *
+ * Colour is small and load-bearing: green means gain and marks the primary
+ * action, blue is structure, gold is reserved almost entirely for the game's
+ * big moments.
+ */
+@theme {
+  --color-void: #05090F;
+  --color-deep: #0A1421;
+  --color-navy: #0F1D2E;
+  --color-slate: #16283C;
+  --color-line: #24405E;
+
+  /* Bevel faces. Every raised surface uses this pair. */
+  --color-bevel-light: #35597F;
+  --color-bevel-dark: #050A11;
+
+  --color-gain: #19F28A;
+  --color-gain-dim: #0E8C4F;
+  --color-gain-deep: #063D22;
+  --color-sky: #43A5FF;
+  --color-sky-dim: #1B5FA8;
+  --color-gold: #FFD84A;
+  --color-gold-dim: #A8871A;
+  --color-loss: #FF5C5C;
+  --color-loss-dim: #A62F2F;
+  --color-grape: #9B8BFF;
+
+  --color-ink: #FFFFFF;
+  --color-muted: #9DB3CC;
+  --color-faint: #62809F;
+
+  --font-display: "Press Start 2P", ui-monospace, monospace;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+}
+
+:root {
+  color-scheme: dark;
+  /* One knob for the whole bevel language. */
+  --bev: 3px;
+}
+
+html,
+body {
+  background: var(--color-void);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+}
+
+/* --------------------------------------------------------------------------
+   Type
+   -------------------------------------------------------------------------- */
+
+/*
+ * Press Start 2P has no lowercase worth the name and is wide, so it is used
+ * for headings, labels and buttons only — never for a paragraph. Its line
+ * height needs to be generous or the caps collide.
+ */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+/*
+ * The wordmark, extruded into the page. Six stacked offsets make a solid
+ * side-face; the seventh is the contact shadow underneath.
+ */
+.wordmark {
+  font-family: var(--font-display);
+  line-height: 1.08;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  text-shadow:
+    2px 2px 0 var(--color-sky-dim),
+    4px 4px 0 var(--color-sky-dim),
+    6px 6px 0 #12283F,
+    8px 8px 0 #0C1B2C,
+    10px 10px 0 #07121D,
+    12px 12px 0 #040B12;
+}
+
+.wordmark-green {
+  text-shadow:
+    2px 2px 0 var(--color-gain-dim),
+    4px 4px 0 var(--color-gain-dim),
+    6px 6px 0 #0A6238,
+    8px 8px 0 #073F24,
+    10px 10px 0 #042616,
+    12px 12px 0 #02120B;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  font-weight: 800;
+}
+
+.text-balance { text-wrap: balance; }
+
+/* --------------------------------------------------------------------------
+   Blocks — the one surface every panel, button and card is cut from
+   -------------------------------------------------------------------------- */
+
+/*
+ * A raised slab. The border is the block's edge; the two inset shadows are
+ * its lit and shaded faces. Hard stops only — a blur here would turn a block
+ * back into a card.
+ */
+.block-surface {
+  border: 2px solid var(--color-line);
+  background: var(--color-navy);
+  box-shadow:
+    inset var(--bev) var(--bev) 0 0 rgba(120, 175, 235, 0.16),
+    inset calc(var(--bev) * -1) calc(var(--bev) * -1) 0 0 rgba(0, 0, 0, 0.55);
+  border-radius: 0;
+}
+
+/* A recessed slab: the same faces, swapped. For wells and inputs. */
+.block-inset {
+  border: 2px solid var(--color-line);
+  background: var(--color-void);
+  box-shadow:
+    inset var(--bev) var(--bev) 0 0 rgba(0, 0, 0, 0.6),
+    inset calc(var(--bev) * -1) calc(var(--bev) * -1) 0 0 rgba(120, 175, 235, 0.1);
+  border-radius: 0;
+}
+
+.panel {
+  /* Kept as an alias so every existing call site inherits the new language. */
+  border: 2px solid var(--color-line);
+  background: var(--color-navy);
+  box-shadow:
+    inset var(--bev) var(--bev) 0 0 rgba(120, 175, 235, 0.16),
+    inset calc(var(--bev) * -1) calc(var(--bev) * -1) 0 0 rgba(0, 0, 0, 0.55);
+  border-radius: 0;
+}
+
+.panel-label {
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-faint);
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons — chunky, and they physically depress
+   -------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0;
+  border-radius: 0;
+  border: 2px solid;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  position: relative;
+  transition: filter 90ms steps(2), transform 60ms steps(1);
+}
+
+/* Pressing moves the block down into its own shadow. */
+.btn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--color-gain);
+  border-color: #0B7A46;
+  color: #04200F;
+  box-shadow:
+    inset var(--bev) var(--bev) 0 0 rgba(255, 255, 255, 0.55),
+    inset calc(var(--bev) * -1) calc(var(--bev) * -1) 0 0 rgba(0, 60, 30, 0.55),
+    4px 4px 0 0 #04351E;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.1); }
+.btn-primary:active:not(:disabled) { box-shadow:
+    inset var(--bev) var(--bev) 0 0 rgba(255, 255, 255, 0.4),
+    inset calc(var(--bev) * -1) calc(var(--bev) * -1) 0 0 rgba(0, 60, 30, 0.5),
+    0 0 0 0 #04351E; }
+
+.btn-ghost {
+  background: var(--color-slate);
+  border-color: var(--color-line);
+  color: var(--color-ink);
+  box-shadow:
+    inset var(--bev) var(--bev) 0 0 rgba(120, 175, 235, 0.2),
+    inset calc(var(--bev) * -1) calc(var(--bev) * -1) 0 0 rgba(0, 0, 0, 0.6),
+    4px 4px 0 0 #060D16;
+}
+.btn-ghost:hover:not(:disabled) { background: #1D344C; }
+.btn-ghost:active:not(:disabled) { box-shadow:
+    inset var(--bev) var(--bev) 0 0 rgba(120, 175, 235, 0.15),
+    inset calc(var(--bev) * -1) calc(var(--bev) * -1) 0 0 rgba(0, 0, 0, 0.6),
+    0 0 0 0 #060D16; }
+
+.btn-gold {
+  background: var(--color-gold);
+  border-color: #8A6E10;
+  color: #241B00;
+  box-shadow:
+    inset var(--bev) var(--bev) 0 0 rgba(255, 255, 255, 0.5),
+    inset calc(var(--bev) * -1) calc(var(--bev) * -1) 0 0 rgba(90, 65, 0, 0.5),
+    4px 4px 0 0 #4A3806;
+}
+.btn-gold:active:not(:disabled) { box-shadow:
+    inset var(--bev) var(--bev) 0 0 rgba(255,255,255,0.4),
+    inset calc(var(--bev) * -1) calc(var(--bev) * -1) 0 0 rgba(90,65,0,0.5),
+    0 0 0 0 #4A3806; }
+
+/* --------------------------------------------------------------------------
+   Navigation tabs
+   -------------------------------------------------------------------------- */
+
+.tab {
+  /* No `display` here on purpose: declaring it would override Tailwind's
+     `hidden` utility, and these links are hidden below `sm`. The markup
+     carries `hidden sm:inline-flex` instead. */
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-display);
+  font-size: 0.5625rem;
+  text-transform: uppercase;
+  padding: 0.6rem 0.85rem;
+  border: 2px solid var(--color-line);
+  background: var(--color-slate);
+  color: var(--color-muted);
+  border-radius: 0;
+  box-shadow:
+    inset var(--bev) var(--bev) 0 0 rgba(120, 175, 235, 0.14),
+    inset calc(var(--bev) * -1) calc(var(--bev) * -1) 0 0 rgba(0, 0, 0, 0.55);
+  transition: color 90ms, background-color 90ms;
+}
+.tab:hover { color: var(--color-ink); background: #1D344C; }
+
+.tab-active {
+  background: var(--color-sky);
+  border-color: #14568F;
+  color: #04121F;
+  box-shadow:
+    inset var(--bev) var(--bev) 0 0 rgba(255, 255, 255, 0.5),
+    inset calc(var(--bev) * -1) calc(var(--bev) * -1) 0 0 rgba(0, 40, 80, 0.5);
+}
+.tab-active:hover { background: var(--color-sky); color: #04121F; }
+
+/* --------------------------------------------------------------------------
+   Backgrounds
+   -------------------------------------------------------------------------- */
+
+/* The playfield lattice the whole site sits on. */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(67, 165, 255, 0.05) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(67, 165, 255, 0.05) 2px, transparent 2px);
+  background-size: 48px 48px;
+}
+
+/* A denser lattice for panel interiors. */
+.bg-grid-fine {
+  background-image:
+    linear-gradient(rgba(67, 165, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(67, 165, 255, 0.045) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Scanlines. Subtle enough to read as CRT rather than as stripes. */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.16) 3px,
+    rgba(0, 0, 0, 0.16) 4px
+  );
+}
+
+/* --------------------------------------------------------------------------
+   Motion. Stepped, not smooth — the interface moves the way the game does.
+   -------------------------------------------------------------------------- */
+@keyframes ss-ticker {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.animate-ticker {
+  animation: ss-ticker 46s linear infinite;
+  will-change: transform;
+}
+
+@keyframes ss-float {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50% { transform: translateY(-16px) rotate(var(--r, 0deg)); }
+}
+.animate-float { animation: ss-float var(--d, 7s) ease-in-out infinite; }
+
+@keyframes ss-drop {
+  from { opacity: 0; transform: translateY(-18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: ss-drop 0.32s steps(4) both; }
+
+@keyframes ss-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.28; }
+}
+.animate-pulse-glow { animation: ss-blink 1.1s steps(1) infinite; }
+
+@keyframes ss-scan {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(220%); }
+}
+.animate-scan { animation: ss-scan 2.6s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ticker,
+  .animate-float,
+  .animate-rise,
+  .animate-pulse-glow,
+  .animate-scan {
+    animation: none !important;
+  }
+  * { transition-duration: 0.01ms !important; }
+}
+
+/* --------------------------------------------------------------------------
+   Canvas and misc
+   -------------------------------------------------------------------------- */
+canvas {
+  display: block;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  image-rendering: auto;
+}
+
+::selection {
+  background: var(--color-gain);
+  color: #04200F;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: var(--color-void); }
+*::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border: 2px solid var(--color-void);
+  border-radius: 0;
+}
+
+input {
+  border-radius: 0;
+}
