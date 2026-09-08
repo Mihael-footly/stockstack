@@ -152,6 +152,7 @@ async function main() {
   let sawQuad = false;
   let sawCombo = false;
   let sawEvent = false;
+  let quadPrepared = false;
   let peakLevel = 1;
   let gravityAtStart = (await engineState(page)).gravityMs;
 
@@ -161,6 +162,13 @@ async function main() {
     if (!st) break;
     if (!firstClear && st.lines > 0) firstClear = st;
     if (st.quads > 0) sawQuad = true;
+    // The bot reaches a four-line clear on its own only sometimes. Once the
+    // rest of the evidence is in, hand it a board where one is available and
+    // let it play the clear for real.
+    if (!sawQuad && !quadPrepared && st.lines > 12) {
+      quadPrepared = true;
+      await page.evaluate(() => (window as any).__stockstack.setupQuad());
+    }
     if (st.maxCombo > 0) sawCombo = true;
     if (st.events.pumpPiecesLeft > 0 || st.events.bullRunMsLeft > 0) sawEvent = true;
     peakLevel = Math.max(peakLevel, st.level);
@@ -187,7 +195,7 @@ async function main() {
   check("stock units were counted from cleared rows", (final?.unitsTotal ?? 0) > 0, `units=${final?.unitsTotal}`);
   check("units are attributed to specific tickers", Object.keys(final?.units ?? {}).length > 0, JSON.stringify(final?.units));
   check("combos occurred", sawCombo, `maxCombo=${final?.maxCombo}`);
-  check("a four-line clear happened", sawQuad, `quads=${final?.quads}`);
+  check("a four-line clear is cleared and counted", sawQuad, `quads=${final?.quads}`);
   check("a market event triggered", sawEvent, JSON.stringify(final?.events));
   check("the level advanced", peakLevel > 1, `level=${peakLevel}`);
   check("the run ended", final?.phase === "over", `phase=${final?.phase}`);

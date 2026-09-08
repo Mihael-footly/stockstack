@@ -6,6 +6,12 @@ build/
 *.tsbuildinfo
 next-env.d.ts
 
-# Local secrets. .env.example documents the shape.
+# Local secrets. .env.example documents the shape and IS committed, so the
+# ignore rule has to be narrower than the `.env*` the Vercel CLI appends.
 .env.local
 .env*.local
+.env
+.env.production
+
+# Vercel CLI link state.
+.vercel

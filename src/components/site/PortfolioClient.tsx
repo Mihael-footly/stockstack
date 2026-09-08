@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { SiteNav } from "./SiteNav";
 import { MobileTabsSpacer } from "./MobileTabs";
 import { useProfile } from "@/lib/useProfile";
+import { VaultPanel } from "./VaultPanel";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 import { num, relativeTime } from "@/lib/format";
 import { RARITY_LABEL, stockByTicker } from "@/game/stocks";
@@ -108,7 +109,12 @@ export function PortfolioClient() {
 
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <span className="panel-label">Portfolio</span>
-        <h1 className="font-display mt-1.5 text-sm text-white sm:text-base">YOUR STOCKPILE</h1>
+        <h1 className="font-display mt-1.5 text-sm text-white sm:text-base">YOUR VAULT</h1>
+
+        {/* Cash first: it is the part with a threshold, a pool and a payout. */}
+        <VaultPanel signedIn={Boolean(profile)} />
+
+        <h2 className="font-display mt-8 text-xs text-white">STOCK UNITS</h2>
 
         {!authLoading && !profile ? (
           <EmptyState

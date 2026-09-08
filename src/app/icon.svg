@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges">
+  <!--
+    The StockStack mark: four blocks, cut the same way every surface in the
+    game is — a lit top-left edge and a shaded bottom-right one. Drawn as flat
+    rects rather than gradients so it stays sharp at 16px.
+  -->
+  <rect width="32" height="32" fill="#05090F"/>
+
+  <!-- top-left: gain green -->
+  <rect x="2"  y="2"  width="13" height="13" fill="#19F28A"/>
+  <rect x="2"  y="2"  width="13" height="3"  fill="#7DFFC4"/>
+  <rect x="2"  y="2"  width="3"  height="13" fill="#7DFFC4"/>
+  <rect x="2"  y="12" width="13" height="3"  fill="#0B9B57"/>
+  <rect x="12" y="2"  width="3"  height="13" fill="#0B9B57"/>
+
+  <!-- top-right: sky blue -->
+  <rect x="17" y="2"  width="13" height="13" fill="#43A5FF"/>
+  <rect x="17" y="2"  width="13" height="3"  fill="#9CCEFF"/>
+  <rect x="17" y="2"  width="3"  height="13" fill="#9CCEFF"/>
+  <rect x="17" y="12" width="13" height="3"  fill="#1D66B4"/>
+  <rect x="27" y="2"  width="3"  height="13" fill="#1D66B4"/>
+
+  <!-- bottom-left: gold -->
+  <rect x="2"  y="17" width="13" height="13" fill="#FFD84A"/>
+  <rect x="2"  y="17" width="13" height="3"  fill="#FFECA0"/>
+  <rect x="2"  y="17" width="3"  height="13" fill="#FFECA0"/>
+  <rect x="2"  y="27" width="13" height="3"  fill="#A8871A"/>
+  <rect x="12" y="17" width="3"  height="13" fill="#A8871A"/>
+
+  <!-- bottom-right: loss red -->
+  <rect x="17" y="17" width="13" height="13" fill="#FF5C5C"/>
+  <rect x="17" y="17" width="13" height="3"  fill="#FF9E9E"/>
+  <rect x="17" y="17" width="3"  height="13" fill="#FF9E9E"/>
+  <rect x="17" y="27" width="13" height="3"  fill="#A82C2C"/>
+  <rect x="27" y="17" width="3"  height="13" fill="#A82C2C"/>
+</svg>

@@ -26,8 +26,49 @@ units are not the same game.
 
 > Stock units are collectibles. They are not shares, securities, or tokens,
 > they cannot be bought, sold or redeemed, and they carry no monetary value.
-> The on-chain tables exist but no settlement backend is configured, so nothing
-> has been promised to anyone. See `supabase/migrations/*_versus_and_chain.sql`.
+
+## Cash rewards
+
+Separate from stock units, and much more carefully bounded. A run that passes
+validation and scores over 2,000 credits **$0.03** to the player's vault, capped
+at $0.30 per player per day. From the vault a player saves a payout address and
+requests a withdrawal.
+
+The rule that holds this together is a database constraint:
+
+```sql
+constraint credits_within_funding check (credited_usd <= funded_usd)
+```
+
+`funded_usd` is raised only out of band, by whoever actually set the money
+aside — there is no application path to it. An unfunded pool credits nothing:
+runs still validate, still bank stock units and still rank, they simply earn no
+cash, and the vault says so instead of showing a number nobody can pay.
+
+**A payout request is queued, not sent.** No treasury signer is connected, so
+nothing moves on-chain automatically. A request records the amount and the
+address and holds the balance in `reserved_usd`; settlement is an operator
+action. The UI states this on its face rather than implying a transfer.
+
+To actually pay people you would need, and this repo does not have: a funded
+treasury wallet, a signer with its key held somewhere safe, an RPC endpoint for
+the target chain, and gas. Wire those to `payout_requests` and move rows from
+`pending` to `sent` with a `tx_hash`.
+
+## Auth
+
+Three ways in:
+
+- **Guest** — play everything solo, bank nothing.
+- **Email and password** — returns a session immediately, no inbox required.
+- **Web3 wallet** — Sign-In With Ethereum (EIP-4361) through Supabase's Web3
+  provider. Wallets are discovered with EIP-6963 rather than fighting over
+  `window.ethereum`. A wallet account has no email, so its username is derived
+  from the address (`0xc02aaa39`).
+
+Magic links were the original design and were removed: they only work once mail
+is genuinely deliverable, and a link that lands in spam is a dead end the player
+cannot debug.
 
 ## Running it
 
@@ -85,10 +126,13 @@ way in is two `SECURITY DEFINER` functions that check first:
 ## Testing
 
 ```bash
-npm test              # 116 engine tests, headless, no browser
-npx tsx test/backend.ts     # 30 RLS and anti-cheat checks against the live project
-npx tsx test/acceptance.ts  # 50 checks: the full loop in a real browser
-npx tsx test/mobile.ts      # 103 checks across four device sizes
+npm test                      # 116 engine tests, headless, no browser
+npx tsx test/backend.ts       # 30 RLS and anti-cheat checks against the live project
+npx tsx test/acceptance.ts    # 50 checks: the full loop in a real browser
+npx tsx test/mobile.ts        # 103 checks across four device sizes
+npx tsx test/signedin.ts      # 22 checks: account -> play -> vault -> leaderboard
+npx tsx test/rewards.ts       # 15 checks: threshold, pool, address, payout refusals
+npx tsx test/authcheck.ts     # what this project's auth actually permits
 ```
 
 Plus `supabase/tests/signed_in_path.sql` for the authenticated award path,
@@ -107,7 +151,6 @@ and the engine emits attacks, but matchmaking and the realtime transport are
 not wired up. Solo and the Daily Run are the finished game; versus arrives once
 they are perfect, which is the order the work was asked for.
 
-**On-chain settlement.** `wallet_connections`, `reward_pools` and
-`onchain_reward_transactions` exist, with a constraint that an allocation can
-never exceed what has actually been funded. Nothing is connected, the default
-status is `unconfigured`, and the portfolio says so on its face.
+**Payout settlement.** Everything up to the request is real: the threshold, the
+pool constraint, the credit ledger, the address, the reservation. Actually
+sending funds is not — see Cash rewards above.

@@ -38,9 +38,16 @@ const WEIGHTS = {
 /**
  * Scoring play: a four-line clear is worth far more than four singles, so
  * small clears are actively declined while the stack stays safe.
+ *
+ * Declining them is not enough on its own — a quad also needs somewhere to
+ * put the fourth row. Reserving a one-wide well and building flat beside it is
+ * how a person sets one up, and without it a four-line clear only happens when
+ * the stack happens to line up.
  */
 const QUAD_BONUS = 4.2;
 const SMALL_CLEAR_PENALTY = -0.9;
+/** Filling the reserved well costs this much while the stack is safe. */
+const WELL_PENALTY = -6;
 /** Above this stack height, take whatever clear is available and survive. */
 const PANIC_HEIGHT = 13;
 
@@ -177,19 +184,34 @@ export class AutoPlayer {
     }
 
     let lineScore = WEIGHTS.linesCleared * cleared;
+    let wellCost = 0;
+    let surface = bumpiness;
+
     if (this.style === "scoring") {
+      const well = e.cols - 1;
       const tallest = Math.max(...heights);
+
       if (tallest < PANIC_HEIGHT) {
-        // Hold the well open and wait for the piece that empties four rows.
+        // Hold out for the piece that empties four rows at once.
         lineScore = cleared === 4 ? QUAD_BONUS : cleared > 0 ? SMALL_CLEAR_PENALTY * cleared : 0;
+
+        // Keep the last column clear so there is a well to clear four into.
+        if (cleared === 0 && heights[well] > 0) {
+          wellCost = WELL_PENALTY * heights[well];
+        }
+
+        // The well is meant to be a step down, so its own edge should not
+        // count as roughness to be smoothed away.
+        surface -= Math.abs(heights[well - 1] - heights[well]);
       }
     }
 
     return (
       WEIGHTS.aggregateHeight * aggregate +
       lineScore +
+      wellCost +
       WEIGHTS.holes * holes +
-      WEIGHTS.bumpiness * bumpiness
+      WEIGHTS.bumpiness * surface
     );
   }
 }

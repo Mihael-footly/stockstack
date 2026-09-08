@@ -1,6 +1,6 @@
 # Database
 
-Fourteen migrations, applied in order to the `stockstack` Supabase project.
+Seventeen migrations, applied in order to the `stockstack` Supabase project.
 They are numbered by the timestamp Supabase recorded, so this directory and
 `supabase_migrations.schema_migrations` agree row for row.
 
@@ -13,6 +13,8 @@ The later files are not tidy-ups — each one closes something the tests found:
 | `fix_seed_generation` | `gen_random_bytes` lives in Supabase's `extensions` schema, which the function's pinned `search_path` excludes. Swapped for core `gen_random_uuid`. |
 | `add_piece_rate_guard` | Nothing related pieces to time, so a forged run could claim 68 placements in two seconds. |
 | `fix_progression_guard` | The guard tested `auth.role()`, which stays `authenticated` inside a `SECURITY DEFINER` function — so it blocked the server's own XP award. **No signed-in player could level up.** It now tests `current_user`. |
+| `username_for_wallet_accounts` | Wallet accounts have no email, so every Web3 sign-up raced for the username `player`. They are now named after the address. |
+| `cash_rewards_and_payouts` | The vault: a score threshold credits cash from a pool that cannot be over-drawn (`credited_usd <= funded_usd`), plus payout addresses and requests. |
 
 ## Applying to a fresh project
 

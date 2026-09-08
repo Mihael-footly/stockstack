@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Logo } from "@/components/site/SiteNav";
 import { GameLoop } from "@/game/GameLoop";
 import { AutoPlayer } from "@/game/AutoPlayer";
 import type { GameMode, GameResultSummary, GameSnapshot, InputAction } from "@/game/types";
@@ -194,6 +195,21 @@ export function GameScreen({ mode }: { mode: GameMode }) {
           };
           botRaf = requestAnimationFrame(tick);
         },
+        // Prepares the board for a four-line clear: four rows filled except
+        // the last column. Nothing about the clear itself is faked — the
+        // scoring bot keeps that well open, drops the next I-piece into it,
+        // and the engine computes the quad through its ordinary path. This
+        // exists so the browser test can check the *handling* of a quad
+        // without waiting on the bot to happen upon one.
+        setupQuad: () => {
+          const top = engine.rows - 4;
+          for (let y = top; y < engine.rows; y++) {
+            for (let x = 0; x < engine.cols - 1; x++) {
+              engine.grid[y * engine.cols + x] = y % engine.stocks.length;
+            }
+          }
+        },
+
         // Ends the run the way a player would: stop steering and drop every
         // piece where it spawns until the stack reaches the top. Fabricating a
         // full grid instead would leave a one-wide well, which the bot simply
@@ -587,16 +603,5 @@ function SpeakerIcon({ muted }: { muted: boolean }) {
         </>
       )}
     </svg>
-  );
-}
-
-export function Logo() {
-  return (
-    <span className="grid grid-cols-2 gap-[2px]" aria-hidden>
-      <span className="h-2 w-2 rounded-[2px] bg-[var(--color-gain)]" />
-      <span className="h-2 w-2 rounded-[2px] bg-[var(--color-sky)]" />
-      <span className="h-2 w-2 rounded-[2px] bg-[var(--color-sky)]" />
-      <span className="h-2 w-2 rounded-[2px] bg-[var(--color-gold)]" />
-    </span>
   );
 }
